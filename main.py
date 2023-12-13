@@ -57,7 +57,6 @@ def estimate_shadow_edges(image_paths, save_images=False):
     bounds = np.load(image_paths[0].parent.parent / "out" / "bounds.npy")
     vertical_bounds = bounds[0]
     horizontal_bounds = bounds[1]
-    # breakpoint()
     vertical_coords = np.meshgrid(
         np.arange(vertical_bounds[0], vertical_bounds[1]),
         np.arange(vertical_bounds[2], vertical_bounds[3]),
@@ -335,7 +334,7 @@ def calibrateShadowLinesFrame(points, K, dist, Rs, ts):
         P2_h,
         P1_v,
         P2_v,
-    )  # in horizontal, horizontal, vertical, vertical plane coordinate systems
+    )  
 
 
 def calibrateShadowLines(image_paths, shadow_edges, K, dist, Rs, ts):
@@ -457,7 +456,6 @@ def reconstruct(image_paths, shadow_times, shadow_planes, K, dist):
     reconstructed_points = []
     colors = []
     rays = pixel2ray(xy_coords, K, dist)
-    # breakpoint()
     intensities = np.load(out / "intensities.npz")
     max_intensities = intensities["max_intensities"]
     min_intensities = intensities["min_intensities"]
@@ -484,10 +482,9 @@ def reconstruct(image_paths, shadow_times, shadow_planes, K, dist):
         t = d / (a * ray[0] + b * ray[1] + c * ray[2])
         if t > 500 or t < -500:
             continue
-        # print(t)
         reconstructed_points.append((ray * t).reshape(1, -1))
         colors.append(images[int(frame_num)][int(coord[1]), int(coord[0])][::-1])
-    # print(len(reconstructed_points))
+
     reconstructed_points = np.vstack(reconstructed_points)
     colors = np.vstack(colors)
     # reconstructed_points, colors = eliminate_outliers(reconstructed_points, colors)
@@ -620,7 +617,7 @@ def capture_exposure_stack(num_exposures):
             "gphoto2",
             "--capture-image-and-download",
             "--filename",
-            f"./mydata/direct-indirect-simon2/exposure_stack/exposure{i}.%C",
+            f"./mydata/direct-indirect/exposure_stack/exposure{i}.%C",
         ]
         subprocess.run(cmd)
 
@@ -633,7 +630,6 @@ def pipeline(src_dir):
         out.mkdir(parents=True, exist_ok=False)
     pick_planar_regions(image_paths[0], out_name="bounds.npy")
     shadow_edges, shadow_times = estimate_shadow_edges(image_paths, save_images=True)
-    breakpoint()
     K, dist = get_intrinsics(
         calib_dir=Path(image_paths[0]).parent.parent / "calib", skip=1
     )
